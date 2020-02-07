@@ -76,7 +76,7 @@ func (h Hyphenator) Hyphenate(text string) string {
 				Note s reassigned repeatedly in a loop below
 				so we keep a copy of the original word.
 			*/
-			origWord, start, end := trim(sub.word, ",.;:?!()")
+			origWord, start, end := trim(sub.word, ",.;:?!()#")
 			s := origWord
 
 			// If there's a custom hyphen mapping for this word.
