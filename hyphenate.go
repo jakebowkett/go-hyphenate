@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 
 	"github.com/speedata/hyphenation"
 )
@@ -61,6 +62,13 @@ func subWords(s string) []subWord {
 func (h Hyphenator) Hyphenate(text string) string {
 
 	ww := []string{}
+
+	/*
+		We trim off any whitespace before calling
+		strings.Fields so that we can preserve and
+		restore it later.
+	*/
+	text, textStart, textEnd := trimSpace(text)
 
 	for _, s := range strings.Fields(text) {
 
@@ -135,22 +143,14 @@ func (h Hyphenator) Hyphenate(text string) string {
 		ww = append(ww, sw)
 	}
 
-	return strings.Join(ww, " ")
+	return textStart + strings.Join(ww, " ") + textEnd
 }
 
 func (h Hyphenator) replace(word string) (replaced string, ok bool) {
-
-	// ss, ok := h.custom[strings.ToLower(word)]
-	// if !ok {
-	// 	return replaced, ok
-	// }
-	// return strings.Join(ss, h.hyphen), ok
-
 	ss, ok := h.custom[strings.ToLower(word)]
 	if !ok {
 		return replaced, ok
 	}
-
 	pos := 0
 	var parts []string
 	for _, s := range ss {
@@ -158,27 +158,6 @@ func (h Hyphenator) replace(word string) (replaced string, ok bool) {
 		pos += len(s)
 	}
 	return strings.Join(parts, h.hyphen), ok
-
-	// mapping, ok := h.custom[strings.ToLower(word)]
-	// if !ok {
-	// 	return replaced, false
-	// }
-	// mapping = append(mapping, len(word))
-
-	// var segs [][]rune
-	// rr := []rune(word)
-	// pos := 0
-	// for _, m := range mapping {
-	// 	segs = append(segs, rr[pos:m])
-	// 	pos = m
-	// }
-
-	// for _, seg := range segs {
-	// 	replaced += string(seg) + h.hyphen
-	// }
-	// replaced = strings.TrimSuffix(replaced, h.hyphen)
-
-	// return replaced, true
 }
 
 func startsWithHyphen(s string) bool {
@@ -214,6 +193,22 @@ func addHyphen(pLen int, full string) bool {
 
 func strLen(s string) int {
 	return len([]rune(s))
+}
+
+func trimSpace(s string) (new, start, end string) {
+
+	orig := s
+
+	s = strings.TrimLeftFunc(s, unicode.IsSpace)
+	diff := len(orig) - len(s)
+	start = orig[0:diff]
+
+	sLen := len(s)
+	s = strings.TrimRightFunc(s, unicode.IsSpace)
+	diff = sLen - len(s)
+	end = orig[len(orig)-diff : len(orig)]
+
+	return s, start, end
 }
 
 func trim(s string, cutset string) (new, start, end string) {
