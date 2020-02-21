@@ -14,9 +14,12 @@ import (
 	"github.com/speedata/hyphenation"
 )
 
-var hyphens = []string{"-", "–", "—"}
+const shyHyphen = "­"
 
-const wordSep = "/" + strings.Join(hyphens, "")
+var (
+	hyphens = []string{"-", "–", "—", shyHyphen}
+	wordSep = "/" + strings.Join(hyphens, "")
+)
 
 type Hyphenator struct {
 	hyphen string
@@ -25,8 +28,11 @@ type Hyphenator struct {
 }
 
 /*
-New returns a Hyphenator that will use the rules
-defined by the file at path.
+New returns a Hyphenator that will use the hyphenation
+patterns defined by the file at path. Patterns can
+be found here:
+
+	http://ctan.math.utah.edu/ctan/tex-archive/language/hyph-utf8/tex/generic/hyph-utf8/patterns/txt/
 
 The hyphen parameter specifies the string that is
 used to hyphenate words.
@@ -99,6 +105,17 @@ func subWords(s string) []subWord {
 /*
 Hyphenate returns a hyphenated version of text, according
 to the parameters provided to New.
+
+Hyphenate deviates from the hyphenation patterns provided
+to New in the following cases:
+
+- If a word is 5 runes or less it will never be hyphenated.
+- If a word segment is 1 rune it will not be hyphenated.
+- Compound words are treated as separate words - e.g. "part-time" is two 4-letter words.
+- Custom hyphenation patterns for words will override defaults.
+
+Words are delineated according to the same criteria used
+by strings.Fields
 */
 func (h Hyphenator) Hyphenate(text string) string {
 
