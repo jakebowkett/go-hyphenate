@@ -6,6 +6,7 @@ additional tweaks to better accomodate English text.
 package hyphenate
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -292,4 +293,74 @@ func in(ss []string, s string) bool {
 		}
 	}
 	return false
+}
+
+type fields struct {
+	prefixed bool
+	seps     []string
+	words    []string
+}
+
+/*
+newFields splits contiguous spaces (as defined by
+unicode.IsSpace) into their own slice separate from
+a words slice.
+*/
+func newFields(s string) fields {
+	f := fields{}
+	if s == "" {
+		return f
+	}
+	f.prefixed = unicode.IsSpace([]rune(s)[0])
+	inField := !f.prefixed
+	start := 0
+	for pos, r := range s {
+		if unicode.IsSpace(r) {
+			if inField {
+				f.words = append(f.words, s[start:pos])
+				inField = false
+				start = pos
+			}
+		} else {
+			if !inField {
+				f.seps = append(f.seps, s[start:pos])
+				inField = true
+				start = pos
+			}
+		}
+	}
+	if inField {
+		f.words = append(f.words, s[start:])
+	} else {
+		f.seps = append(f.seps, s[start:])
+	}
+	return f
+}
+
+func (f fields) replaceWords(newWords []string) (string, error) {
+	if len(newWords) != len(f.words) {
+		return "", fmt.Errorf(
+			"hyphenate: mismatch in number of words supplied to fields.words:"+
+				"\n\tgot %d,"+
+				"\n\twanted %d",
+			len(newWords), len(f.words))
+	}
+	n := len(f.seps) + len(newWords)
+	combined := make([]string, n, n)
+	for i := range combined {
+		if f.prefixed {
+			if i%2 == 0 {
+				combined[i] = f.seps[i/2]
+			} else {
+				combined[i] = newWords[i/2]
+			}
+		} else {
+			if i%2 == 0 {
+				combined[i] = newWords[i/2]
+			} else {
+				combined[i] = f.seps[i/2]
+			}
+		}
+	}
+	return strings.Join(combined, ""), nil
 }
