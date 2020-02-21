@@ -109,10 +109,10 @@ to the parameters provided to New.
 Hyphenate deviates from the hyphenation patterns provided
 to New in the following cases:
 
-- If a word is 5 runes or less it will never be hyphenated.
-- If a word segment is 1 rune it will not be hyphenated.
-- Compound words are treated as separate words - e.g. "part-time" is two 4-letter words.
-- Custom hyphenation patterns for words will override defaults.
+	- If a word is 5 runes or less it will never be hyphenated.
+	- If a word segment is 1 rune it will not be hyphenated.
+	- Compound words are treated as separate words - e.g. "part-time" is two 4-letter words.
+	- Custom hyphenation patterns for words will override defaults.
 
 Words are delineated according to the same criteria used
 by strings.Fields
