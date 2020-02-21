@@ -9,7 +9,9 @@ import (
 	"github.com/speedata/hyphenation"
 )
 
-const wordSep = "-–—/"
+var hyphens = []string{"-", "–", "—"}
+
+const wordSep = "/" + strings.Join(hyphens, "")
 
 type Hyphenator struct {
 	hyphen string
@@ -161,7 +163,7 @@ func (h Hyphenator) replace(word string) (replaced string, ok bool) {
 }
 
 func startsWithHyphen(s string) bool {
-	for _, c := range []string{"-", "–", "—"} {
+	for _, c := range hyphens {
 		if strings.HasPrefix(s, c) {
 			return true
 		}
@@ -169,7 +171,7 @@ func startsWithHyphen(s string) bool {
 	return false
 }
 func endsWithHyphen(s string) bool {
-	for _, c := range []string{"-", "–", "—"} {
+	for _, c := range hyphens {
 		if strings.HasSuffix(s, c) {
 			return true
 		}
