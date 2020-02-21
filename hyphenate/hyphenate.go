@@ -1,3 +1,8 @@
+/*
+Package hyphenate provides a simple way to hyphenate text.
+It uses github.com/speedata/hyphenation along with some
+additional tweaks to better accomodate English text.
+*/
 package hyphenate
 
 import (
@@ -19,6 +24,35 @@ type Hyphenator struct {
 	custom map[string][]string
 }
 
+/*
+New returns a Hyphenator that will use the rules
+defined by the file at path.
+
+The hyphen parameter specifies the string that is
+used to hyphenate words.
+
+Callers may also override the ruleset at path by
+supplying custom. When a word supplied to the
+Hyphenate method is found as a key in custom the
+corresponding value will be designate how the
+word will be broken up.
+
+While capitalisation will be preserved in calls
+to the Hyphenate method, the custom map should
+use lower case spellings otherwise they will not
+be considered.
+
+	custom := map[string][]string{
+		"hello": []string{"h", "ello"},
+	}
+
+	h, err := hyphenate.New("en_us.txt", "-", custom)
+	if err != nil {
+		// handle err
+	}
+
+	println(h.Hyphenate("Hello")) // prints "H-ello"
+*/
 func New(path, hyphen string, custom map[string][]string) (h Hyphenator, err error) {
 	path, err = filepath.Abs(path)
 	if err != nil {
@@ -62,6 +96,10 @@ func subWords(s string) []subWord {
 	return sw
 }
 
+/*
+Hyphenate returns a hyphenated version of text, according
+to the parameters provided to New.
+*/
 func (h Hyphenator) Hyphenate(text string) string {
 
 	ww := []string{}
