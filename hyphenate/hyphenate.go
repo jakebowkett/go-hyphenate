@@ -38,11 +38,10 @@ be found here:
 The hyphen parameter specifies the string that is
 used to hyphenate words.
 
-Callers may also override the ruleset at path by
-supplying custom. When a word supplied to the
-Hyphenate method is found as a key in custom the
-corresponding value will be designate how the
-word will be broken up.
+Callers may also override the ruleset at path for a
+specific word by supplying custom. When a word is
+found as a key in custom the corresponding value will
+instead designate how the word will be broken up.
 
 While capitalisation will be preserved in calls
 to the Hyphenate method, the custom map should
