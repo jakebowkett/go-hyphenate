@@ -28,6 +28,7 @@ func New(path, hyphen string, custom map[string][]string) (h Hyphenator, err err
 	if err != nil {
 		return h, err
 	}
+	defer f.Close()
 	lang, err := hyphenation.New(f)
 	if err != nil {
 		return h, err
