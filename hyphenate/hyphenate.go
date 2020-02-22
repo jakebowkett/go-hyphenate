@@ -6,7 +6,6 @@ additional tweaks to better accomodate English text.
 package hyphenate
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -120,15 +119,9 @@ by strings.Fields
 func (h Hyphenator) Hyphenate(text string) string {
 
 	ww := []string{}
+	fields := newFields(text)
 
-	/*
-		We trim off any whitespace before calling
-		strings.Fields so that we can preserve and
-		restore it later.
-	*/
-	text, textStart, textEnd := trimSpace(text)
-
-	for _, s := range strings.Fields(text) {
+	for _, s := range fields.words {
 
 		sw := ""
 
@@ -201,7 +194,7 @@ func (h Hyphenator) Hyphenate(text string) string {
 		ww = append(ww, sw)
 	}
 
-	return textStart + strings.Join(ww, " ") + textEnd
+	return fields.replaceWords(ww)
 }
 
 func (h Hyphenator) replace(word string) (replaced string, ok bool) {
@@ -251,22 +244,6 @@ func addHyphen(pLen int, full string) bool {
 
 func strLen(s string) int {
 	return len([]rune(s))
-}
-
-func trimSpace(s string) (new, start, end string) {
-
-	orig := s
-
-	s = strings.TrimLeftFunc(s, unicode.IsSpace)
-	diff := len(orig) - len(s)
-	start = orig[0:diff]
-
-	sLen := len(s)
-	s = strings.TrimRightFunc(s, unicode.IsSpace)
-	diff = sLen - len(s)
-	end = orig[len(orig)-diff : len(orig)]
-
-	return s, start, end
 }
 
 func trim(s string, cutset string) (new, start, end string) {
@@ -336,14 +313,7 @@ func newFields(s string) fields {
 	return f
 }
 
-func (f fields) replaceWords(newWords []string) (string, error) {
-	if len(newWords) != len(f.words) {
-		return "", fmt.Errorf(
-			"hyphenate: mismatch in number of words supplied to fields.words:"+
-				"\n\tgot %d,"+
-				"\n\twanted %d",
-			len(newWords), len(f.words))
-	}
+func (f fields) replaceWords(newWords []string) string {
 	n := len(f.seps) + len(newWords)
 	combined := make([]string, n, n)
 	for i := range combined {
@@ -361,5 +331,5 @@ func (f fields) replaceWords(newWords []string) (string, error) {
 			}
 		}
 	}
-	return strings.Join(combined, ""), nil
+	return strings.Join(combined, "")
 }
